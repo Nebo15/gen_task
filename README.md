@@ -52,7 +52,7 @@ It's [available in Hex](https://hex.pm/packages/gen_task), the package can be in
 
     ```elixir
     def deps do
-      [{:gen_task, "~> 0.1.3"}]
+      [{:gen_task, "~> 0.1.4"}]
     end
     ```
 
