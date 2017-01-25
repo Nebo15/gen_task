@@ -22,7 +22,7 @@ defmodule GenTask do
     {:stop, reason :: term, new_state} when new_state: term
 
   @doc """
-  Callback function that should implement worker function that must be securely processed.
+  Callback that should implement task business logic that must be securely processed.
   """
   @callback run(state :: term) :: term
 
@@ -96,7 +96,7 @@ defmodule GenTask do
 
   If the time runs out before a message from
   the task is received, this function will return `{:timeout, Task.t}`
-  and the monitor will remain active. Therefore `yield/2` can be
+  and the monitor will remain active. Therefore `Task.yield/2` can be
   called on task.
 
   This function assumes the task's monitor is still active or the
@@ -105,8 +105,7 @@ defmodule GenTask do
   for the duration of the timeout awaiting the message.
 
   If you intend to shut the task down if it has not responded within `timeout`
-  milliseconds, you should chain this together with `shutdown/1`.
-  (This is default implementation for `handle_result(:timeout, reason, state)`.)
+  milliseconds, you should chain this together with `Task.shutdown/1`.
   """
   @spec start_task(fun, timeout) :: {:ok, term} | {:exit, term} | {:timeout, Task.t}
   def start_task(fun, timeout \\ 30_000) when is_function(fun) do
