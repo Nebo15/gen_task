@@ -1,5 +1,7 @@
 # GenTask
 
+[![Deps Status](https://beta.hexfaktor.org/badge/all/github/Nebo15/gen_task.svg)](https://beta.hexfaktor.org/github/Nebo15/gen_task) [![Hex.pm Downloads](https://img.shields.io/hexpm/dw/gen_task.svg?maxAge=3600)](https://hex.pm/packages/gen_task) [![Latest Version](https://img.shields.io/hexpm/v/gen_task.svg?maxAge=3600)](https://hex.pm/packages/gen_task) [![License](https://img.shields.io/hexpm/l/gen_task.svg?maxAge=3600)](https://hex.pm/packages/gen_task) [![Build Status](https://travis-ci.org/Nebo15/gen_task.svg?branch=master)](https://travis-ci.org/Nebo15/gen_task) [![Coverage Status](https://coveralls.io/repos/github/Nebo15/gen_task/badge.svg?branch=master)](https://coveralls.io/github/Nebo15/gen_task?branch=master)
+
 Generic Task behavior that helps to encapsulate worker errors and recover from them in classic GenStage's.
 
 ## Motivation
