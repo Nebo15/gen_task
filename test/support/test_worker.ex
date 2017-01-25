@@ -7,7 +7,6 @@ defmodule TestWorker do
   end
 
   def init(state) do
-    Process.flag(:trap_exit, true)
     {:ok, state, 100}
   end
 
