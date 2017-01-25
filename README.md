@@ -46,7 +46,7 @@ It's [available in Hex](https://hex.pm/docs/publish), the package can be install
 
     ```elixir
     def deps do
-      [{:gen_task, "~> 0.1.1"}]
+      [{:gen_task, "~> 0.1.2"}]
     end
     ```
 
