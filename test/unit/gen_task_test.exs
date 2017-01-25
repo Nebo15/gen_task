@@ -13,4 +13,12 @@ defmodule GenTaskTest do
     TestQueue.subscribe(TestConsumer)
     assert_receive {:undelivered_jobs, 0}, 10_000
   end
+
+  test "securely run task function" do
+    test_pid = self()
+    GenTask.start_task(fn ->
+      send(test_pid, :done)
+    end)
+    assert_receive :done, 500
+  end
 end
