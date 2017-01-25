@@ -20,6 +20,10 @@ Supervisor gets restarted, but it **won't receive receive any jobs** resulting i
 
   This option is not safe by-default, because process that doesn't trap exits will not call this callback when supervisor is sending exit signal to it (due to supervisor restart).
 
+  2. Linking RabbitMQ client lib channel/connection processes to a workers.
+
+  May be a bad solution because all jobs will be re-scheduled whenever a single job fails, resulting in a many duplicate-processed jobs.
+
   2. Store tags in a separate process which monitors supervisor and it's workers.
 
   3. Keep storing tags and job payload within GenStage state, but wrap any unsafe code in a [`Task`](https://hexdocs.pm/elixir/Task.html). [[1]](https://github.com/elixir-lang/gen_stage/issues/131#issuecomment-265758380)

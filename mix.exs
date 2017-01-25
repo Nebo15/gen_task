@@ -7,7 +7,7 @@ defmodule GenTask.Mixfile do
     [app: :gen_task,
      description: "Generic Task behavior that helps to encapsulate worker errors and recover from them in " <>
                   "classic GenStage's.",
-     package: package,
+     package: package(),
      version: @version,
      elixir: "~> 1.3",
      elixirc_paths: elixirc_paths(Mix.env),
