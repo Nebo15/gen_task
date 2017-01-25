@@ -30,6 +30,12 @@ Supervisor gets restarted, but it **won't receive receive any jobs** resulting i
 
   Internally this looks familiar to pt. 2, but doesn't require us to re-invent supervisor behavior.
 
+## Picked solution description
+
+Each time job is started we spawn a "sentitel" GenServer process that stores job that needs to be processed, this job is later started under `Task.Supervisor` via `async_nolink/2` that allows to process job asynchronously without linking it to the caller process.
+
+To receive job status sentitel process leverages `Task.yield/1` function, that blocks current process until task completes (which saves reduction for sentinel process).
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
