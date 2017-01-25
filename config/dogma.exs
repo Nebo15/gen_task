@@ -5,6 +5,7 @@ config :dogma,
   rule_set: Dogma.RuleSet.All,
   exclude: [
     ~r(\Adeps/),
+    ~r(\Atest/support/),
   ],
   override: [
     %Rule.LineLength{ max_length: 120 },

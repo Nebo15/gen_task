@@ -3,7 +3,8 @@
     %{
       name: "default",
       files: %{
-        included: ["lib/"]
+        included: ["lib/"],
+        excluded: ["test/support"]
       },
       checks: [
         {Credo.Check.Design.TagTODO, exit_status: 0},
