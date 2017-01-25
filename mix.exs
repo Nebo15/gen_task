@@ -24,7 +24,7 @@ defmodule GenTask.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :confex],
+    [applications: [],
      mod: {GenTask, []}]
   end
 
@@ -46,9 +46,7 @@ defmodule GenTask.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:distillery, "~> 0.10"},
-     {:confex, "~> 1.4"},
-     {:ex_doc, ">= 0.0.0", only: [:dev, :test]},
+    [{:ex_doc, ">= 0.0.0", only: [:dev, :test]},
      {:excoveralls, "~> 0.5", only: [:dev, :test]},
      {:dogma, "~> 0.1.12", only: [:dev, :test]},
      {:credo, ">= 0.5.1", only: [:dev, :test]}]
