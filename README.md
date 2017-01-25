@@ -102,5 +102,55 @@ It's [available in Hex](https://hex.pm/packages/gen_task), the package can be in
     end
     ```
 
+  4. (Optional.) Supervise your workers:
+
+    Define `MyWorker` supervisor:
+
+    ```elixir
+    defmodule MyWorkerSupervisor do
+      use Supervisor
+
+      def start_link do
+        Supervisor.start_link(__MODULE__, [], name: __MODULE__)
+      end
+
+      def start_worker(job) do
+        Supervisor.start_child(__MODULE__, [job])
+      end
+
+      def init(_) do
+        children = [
+          worker(MyWorker, [], restart: :transient)
+        ]
+
+        supervise(children, strategy: :simple_one_for_one)
+      end
+    end
+    ```
+
+    Add it to a application supervision tree:
+
+    ```elixir
+    # File: lib/my_app.ex
+    # ...
+
+    def start(_type, _args) do
+      import Supervisor.Spec, warn: false
+
+      children = [
+        supervisor(MyWorkerSupervisor, [])
+        # ...
+      ]
+
+      opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+      Supervisor.start_link(children, opts)
+    end
+
+    # ...
+    ```
+
+    Then you can use `MyWorkerSupervisor.start_worker/1` to start your workers.
+
+
 The docs can be found at [https://hexdocs.pm/gen_task](https://hexdocs.pm/gen_task)
 
