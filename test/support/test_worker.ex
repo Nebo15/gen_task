@@ -7,29 +7,46 @@ defmodule TestWorker do
   end
 
   def init(state) do
+    Process.flag(:trap_exit, true)
     {:ok, state, 100}
   end
 
   def handle_info(:timeout, %{payload: payload, tag: tag}) do
-    {:ok, res} = Task.async(fn ->
+    task = Task.Supervisor.async_nolink(GenTask.Supervisor, fn ->
       payload
       |> process(tag)
     end)
-    |> Task.yield() # TODO: add timeout
+    |> Task.yield()
 
-    res
-    |> send_ack(tag)
+    case task do
+      {:ok, result} ->
+        send_ack(result, tag)
+      {:exit, reason} ->
+        Logger.error("Task with tag #{inspect tag} terminated with reason: #{inspect reason}")
+        TestQueue.nack(tag)
+    end
 
     {:stop, :normal, []}
   end
 
-  # # Simulated errors
-  # defp process(_payload, tag) when rem(tag, 2) == 0 do
-  #   throw "Error!"
+  def handle_info(any, state) do
+    IO.inspect "Reseived info"
+    IO.inspect {any, state}
+    {:noreply, state}
+  end
+
+  # def terminate(:normal, _), do: :ok
+  # def terminate(reason, %{tag: tag}) do
+  #   IO.inspect reason
+  #   TestQueue.nack(tag)
   # end
 
   # Success jobs
   defp process(_payload, tag) do
+    # Simulated errors
+    if :rand.uniform(2) == 1 do
+      throw "Error!"
+    end
     Logger.info("Processed job ##{tag}")
     :timer.sleep(100)
     :ok

@@ -11,8 +11,10 @@ defmodule GenTaskTest do
   end
 
   test "process jobs" do
+    # :observer.start()
+    # :timer.sleep(30000)
     TestQueue.attach_observer(self())
     TestQueue.subscribe(TestConsumer)
-    assert_receive {:undelivered_jobs, 0}, 5_000
+    assert_receive {:undelivered_jobs, 0}, 10_000
   end
 end

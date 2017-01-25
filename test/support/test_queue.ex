@@ -76,18 +76,21 @@ defmodule TestQueue do
   end
 
   defp dispatch_jobs(%{opts: opts, workers: workers, jobs: jobs}) do
-    {jobs, workers, undelivered_count} = jobs
-    |> Enum.reduce({[], workers, 0}, fn
-      %{state: :undelivered} = job, {jobs, workers, undelivered_count} ->
+    {jobs, workers, ack_count} = jobs
+    |> Enum.reduce({[], workers, length(jobs)}, fn
+      %{state: state} = job, {jobs, workers, ack_count} when state in [:undelivered, :nacked] ->
         {job, workers} = dispatch_job(job, workers, opts)
-        {jobs ++ [job], workers, undelivered_count + 1}
+        {jobs ++ [job], workers, ack_count}
 
-      job, {jobs, workers, undelivered_count} ->
-        {jobs ++ [job], workers, undelivered_count}
+      %{state: :unacked} = job, {jobs, workers, ack_count} ->
+        {jobs ++ [job], workers, ack_count}
+
+      job, {jobs, workers, ack_count} ->
+        {jobs ++ [job], workers, ack_count - 1}
     end)
 
     if(opts[:observer_pid]) do
-      send(opts[:observer_pid], {:undelivered_jobs, undelivered_count})
+      send(opts[:observer_pid], {:undelivered_jobs, ack_count})
     end
 
     %{opts: opts, workers: workers, jobs: jobs}
