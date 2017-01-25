@@ -1,5 +1,5 @@
 defmodule TestWorker do
-  use GenTask
+  use GenTask, timeout: 1_000
   require Logger
 
   def run(%{payload: _payload, tag: tag}) do
@@ -22,5 +22,10 @@ defmodule TestWorker do
     Logger.error("Task with tag #{inspect tag} terminated with reason: #{inspect reason}")
     TestQueue.nack(tag)
     {:stop, :normal, state}
+  end
+
+  def handle_result(:timeout, task, state) do
+    Task.shutdown(task)
+    handle_result(:exit, :timeout, state)
   end
 end

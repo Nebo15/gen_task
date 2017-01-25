@@ -36,9 +36,9 @@ Each time job is started we spawn a "sentitel" GenServer process that stores job
 
 To receive job status sentitel process leverages `Task.yield/1` function, that blocks current process until task completes (which saves reduction for sentinel process).
 
-## Installation
+## Installation and usage
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+It's [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
 
   1. Add `gen_task` to your list of dependencies in `mix.exs`:
 
@@ -56,6 +56,43 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     end
     ```
 
-If [published on HexDocs](https://hex.pm/docs/tasks#hex_docs), the docs can
-be found at [https://hexdocs.pm/gen_task](https://hexdocs.pm/gen_task)
+  3. Define your business logic and result handling:
+
+    ```elixir
+    defmodule MyWorker do
+      use GenTask
+      require Logger
+
+      # Define business logic
+      def run(%{payload: _payload, tag: tag}) do
+        # Simulated errors
+        if :rand.uniform(2) == 1 do
+          throw "Error!"
+        end
+
+        Logger.info("Processed job ##{tag}")
+        :timer.sleep(100)
+        :ok
+      end
+
+      # Handle task statuses
+      def handle_result(:ok, _result, %{tag: tag} = state) do
+        # MyQueue.ack(tag)
+        {:stop, :normal, state}
+      end
+
+      def handle_result(:exit, reason, %{tag: tag} = state) do
+        Logger.error("Task with tag #{inspect tag} terminated with reason: #{inspect reason}")
+        # MyQueue.nack(tag)
+        {:stop, :normal, state}
+      end
+
+      def handle_result(:timeout, task, state) do
+        Task.shutdown(task) # Shut down task on yield timeout
+        handle_result(:exit, :timeout, state)
+      end
+    end
+    ```
+
+The docs can be found at [https://hexdocs.pm/gen_task](https://hexdocs.pm/gen_task)
 

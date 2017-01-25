@@ -27,11 +27,13 @@ defmodule GenTask do
   @callback run(state :: term) :: term
 
   @doc false
-  defmacro __using__(_) do
-    quote location: :keep do
+  defmacro __using__(opts) do
+    quote location: :keep, bind_quoted: [opts: opts] do
       use GenServer
       @behaviour GenServer
       @behaviour GenTask
+
+      @yield_timeout opts[:timeout] || 30_000
 
       @doc false
       def start_link(state) do
@@ -50,7 +52,7 @@ defmodule GenTask do
 
       @doc false
       def handle_info(:timeout, state) do
-        {status, reason} = GenTask.start_task(__MODULE__, :run, [state])
+        {status, reason} = GenTask.start_task(__MODULE__, :run, [state], @yield_timeout)
         handle_result(status, reason, state)
       end
 
