@@ -34,13 +34,19 @@ Supervisor gets restarted, but it **won't receive receive any jobs** resulting i
 
 ## Picked solution description
 
-Each time job is started we spawn a "sentitel" GenServer process that stores job that needs to be processed, this job is later started under `Task.Supervisor` via `async_nolink/2` that allows to process job asynchronously without linking it to the caller process.
+Tasks is started under `Task.Supervisor` (via `async_nolink/2`) inside `GenTask` application. They are not linked to a caller process which allows to persist state without risking that caller pid will be terminated along with task itself, so further processing is possible when error occurs. Task result is received via `Task.yield/1` function.
 
-To receive job status sentitel process leverages `Task.yield/1` function, that blocks current process until task completes (which saves reduction for sentinel process).
+Tasks are started with a `:temporary` restart strategy (never restart), to protect supervisor from exits.
+
+The package itself provides two ways to handle asynchronous jobs:
+
+  1. Runner functions `GenTask.start_task/1` and `GenTask.start_task/3` to start function under unlinked supervisioned process and yield for task result.
+
+  2. `GenTask` behaviour that is based on GenServer that will start task (from `run/1` callback) processing after it's start and deliver status into `handle_result/3` callbacks.
 
 ## Installation and usage
 
-It's [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+It's [available in Hex](https://hex.pm/packages/gen_task), the package can be installed as:
 
   1. Add `gen_task` to your list of dependencies in `mix.exs`:
 
