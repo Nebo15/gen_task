@@ -50,104 +50,104 @@ It's [available in Hex](https://hex.pm/packages/gen_task), the package can be in
 
   1. Add `gen_task` to your list of dependencies in `mix.exs`:
 
-    ```elixir
-    def deps do
-      [{:gen_task, "~> 0.1.4"}]
-    end
-    ```
+  ```elixir
+  def deps do
+    [{:gen_task, "~> 0.1.4"}]
+  end
+  ```
 
   2. Ensure `gen_task` is started before your application:
 
-    ```elixir
-    def application do
-      [applications: [:gen_task]]
-    end
-    ```
+  ```elixir
+  def application do
+    [applications: [:gen_task]]
+  end
+  ```
 
   3. Define your business logic and result handling:
 
-    ```elixir
-    defmodule MyWorker do
-      use GenTask
-      require Logger
+  ```elixir
+  defmodule MyWorker do
+    use GenTask
+    require Logger
 
-      # Define business logic
-      def run(%{payload: _payload, tag: tag}) do
-        # Simulated errors
-        if :rand.uniform(2) == 1 do
-          throw "Error!"
-        end
-
-        Logger.info("Processed job ##{tag}")
-        :timer.sleep(100)
-        :ok
+    # Define business logic
+    def run(%{payload: _payload, tag: tag}) do
+      # Simulated errors
+      if :rand.uniform(2) == 1 do
+        throw "Error!"
       end
 
-      # Handle task statuses
-      def handle_result(:ok, _result, %{tag: tag} = state) do
-        # MyQueue.ack(tag)
-        {:stop, :normal, state}
-      end
-
-      def handle_result(:exit, reason, %{tag: tag} = state) do
-        Logger.error("Task with tag #{inspect tag} terminated with reason: #{inspect reason}")
-        # MyQueue.nack(tag)
-        {:stop, :normal, state}
-      end
-
-      def handle_result(:timeout, task, state) do
-        Task.shutdown(task) # Shut down task on yield timeout
-        handle_result(:exit, :timeout, state)
-      end
+      Logger.info("Processed job ##{tag}")
+      :timer.sleep(100)
+      :ok
     end
-    ```
+
+    # Handle task statuses
+    def handle_result(:ok, _result, %{tag: tag} = state) do
+      # MyQueue.ack(tag)
+      {:stop, :normal, state}
+    end
+
+    def handle_result(:exit, reason, %{tag: tag} = state) do
+      Logger.error("Task with tag #{inspect tag} terminated with reason: #{inspect reason}")
+      # MyQueue.nack(tag)
+      {:stop, :normal, state}
+    end
+
+    def handle_result(:timeout, task, state) do
+      Task.shutdown(task) # Shut down task on yield timeout
+      handle_result(:exit, :timeout, state)
+    end
+  end
+  ```
 
   4. (Optional.) Supervise your workers:
 
   Define `MyWorker` supervisor:
 
-    ```elixir
-    defmodule MyWorkerSupervisor do
-      use Supervisor
+  ```elixir
+  defmodule MyWorkerSupervisor do
+    use Supervisor
 
-      def start_link do
-        Supervisor.start_link(__MODULE__, [], name: __MODULE__)
-      end
-
-      def start_worker(job) do
-        Supervisor.start_child(__MODULE__, [job])
-      end
-
-      def init(_) do
-        children = [
-          worker(MyWorker, [], restart: :transient)
-        ]
-
-        supervise(children, strategy: :simple_one_for_one)
-      end
+    def start_link do
+      Supervisor.start_link(__MODULE__, [], name: __MODULE__)
     end
-    ```
+
+    def start_worker(job) do
+      Supervisor.start_child(__MODULE__, [job])
+    end
+
+    def init(_) do
+      children = [
+        worker(MyWorker, [], restart: :transient)
+      ]
+
+      supervise(children, strategy: :simple_one_for_one)
+    end
+  end
+  ```
 
   Add it to a application supervision tree:
 
-    ```elixir
-    # File: lib/my_app.ex
-    # ...
+  ```elixir
+  # File: lib/my_app.ex
+  # ...
 
-    def start(_type, _args) do
-      import Supervisor.Spec, warn: false
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
 
-      children = [
-        supervisor(MyWorkerSupervisor, [])
-        # ...
-      ]
+    children = [
+      supervisor(MyWorkerSupervisor, [])
+      # ...
+    ]
 
-      opts = [strategy: :one_for_one, name: MyApp.Supervisor]
-      Supervisor.start_link(children, opts)
-    end
+    opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
 
-    # ...
-    ```
+  # ...
+  ```
 
   Then you can use `MyWorkerSupervisor.start_worker/1` to start your workers.
 
