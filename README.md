@@ -104,7 +104,7 @@ It's [available in Hex](https://hex.pm/packages/gen_task), the package can be in
 
   4. (Optional.) Supervise your workers:
 
-    Define `MyWorker` supervisor:
+  Define `MyWorker` supervisor:
 
     ```elixir
     defmodule MyWorkerSupervisor do
@@ -128,7 +128,7 @@ It's [available in Hex](https://hex.pm/packages/gen_task), the package can be in
     end
     ```
 
-    Add it to a application supervision tree:
+  Add it to a application supervision tree:
 
     ```elixir
     # File: lib/my_app.ex
@@ -149,7 +149,7 @@ It's [available in Hex](https://hex.pm/packages/gen_task), the package can be in
     # ...
     ```
 
-    Then you can use `MyWorkerSupervisor.start_worker/1` to start your workers.
+  Then you can use `MyWorkerSupervisor.start_worker/1` to start your workers.
 
 
 The docs can be found at [https://hexdocs.pm/gen_task](https://hexdocs.pm/gen_task)
